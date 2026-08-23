@@ -1,0 +1,190 @@
+openapi: 3.1.0
+info:
+  title: Candidate Management API
+  description: Fictional API used as a technical-writing portfolio sample.
+  version: 1.0.0
+
+servers:
+  - url: https://api.example.com/v1
+
+security:
+  - bearerAuth: []
+
+paths:
+  /candidates:
+    get:
+      summary: List candidates
+      operationId: listCandidates
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [active, inactive, hired]
+      responses:
+        '200':
+          description: Candidate list returned successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  page:
+                    type: integer
+                  limit:
+                    type: integer
+                  total:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Candidate'
+
+    post:
+      summary: Create a candidate
+      operationId: createCandidate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CandidateCreate'
+      responses:
+        '201':
+          description: Candidate created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Candidate'
+        '409':
+          description: Candidate already exists
+
+  /candidates/{candidateId}:
+    parameters:
+      - name: candidateId
+        in: path
+        required: true
+        schema:
+          type: string
+
+    get:
+      summary: Get a candidate
+      operationId: getCandidate
+      responses:
+        '200':
+          description: Candidate found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Candidate'
+        '404':
+          description: Candidate not found
+
+    patch:
+      summary: Update a candidate
+      operationId: updateCandidate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CandidateUpdate'
+      responses:
+        '200':
+          description: Candidate updated successfully
+        '404':
+          description: Candidate not found
+
+    delete:
+      summary: Delete a candidate
+      operationId: deleteCandidate
+      responses:
+        '204':
+          description: Candidate deleted successfully
+        '404':
+          description: Candidate not found
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Candidate:
+      type: object
+      required:
+        - id
+        - firstName
+        - lastName
+        - email
+      properties:
+        id:
+          type: string
+          example: can_10023
+        firstName:
+          type: string
+          example: Riya
+        lastName:
+          type: string
+          example: Verma
+        email:
+          type: string
+          format: email
+          example: riya.verma@example.com
+        status:
+          type: string
+          enum: [active, inactive, hired]
+          default: active
+        createdAt:
+          type: string
+          format: date-time
+
+    CandidateCreate:
+      type: object
+      required:
+        - firstName
+        - lastName
+        - email
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
+        status:
+          type: string
+          enum: [active, inactive, hired]
+
+    CandidateUpdate:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
+        status:
+          type: string
+          enum: [active, inactive, hired]
